@@ -1,5 +1,5 @@
 
-import java.awt.Image;
+import java.awt .Image;
 import static java.lang.Math.random;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -10,6 +10,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.SwingUtilities;
 
+// Greizel sension 8-940-530
+// nota 100 
+// 14/10/24
 public class Lab15_02 {
     public static void main(String[] args) {   
         SwingUtilities.invokeLater(new Runnable(){ 
@@ -70,6 +73,7 @@ class VentanaCarrera extends JFrame {
         JButton botonIniciarCarrera;
         setSize(500, 360);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
 
         JPanel panel = new JPanel();
         panel.setLayout(null);
