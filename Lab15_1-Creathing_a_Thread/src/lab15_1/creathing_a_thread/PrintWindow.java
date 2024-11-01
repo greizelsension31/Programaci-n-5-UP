@@ -6,13 +6,22 @@ import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 
+//Greizel sension 8-940-530
+//nota 100
+//fecha 18/10/24
+
 public class PrintWindow extends JFrame {
     private JTextField countLimitField;
-    private JButton startButton, stopButton, clearButton;
+    private JButton startButton, stopButton, pauseButton, clearButton;
     private JTextArea displayArea;
     private JScrollPane scrollPane;  // Panel de desplazamiento
     private PrintsNumbers printsNumbers;
     private Thread thread;
+
+    public static void main(String[] args) {
+        PrintWindow window = new PrintWindow();
+        window.setVisible(true);
+    }
 
     public PrintWindow() {
         setTitle("Prints Numbers");
@@ -35,7 +44,6 @@ public class PrintWindow extends JFrame {
         countLimitField.addFocusListener(new FocusAdapter() {
             @Override
             public void focusGained(FocusEvent e) {
-                // Eliminar el texto del placeholder al ganar el foco
                 if (countLimitField.getText().equals("Ingrese cantidad")) {
                     countLimitField.setText("");
                 }
@@ -43,7 +51,6 @@ public class PrintWindow extends JFrame {
 
             @Override
             public void focusLost(FocusEvent e) {
-                // Si el campo está vacío al perder el foco, restablecer el placeholder
                 if (countLimitField.getText().isEmpty()) {
                     countLimitField.setText("Ingrese cantidad");
                 }
@@ -58,22 +65,28 @@ public class PrintWindow extends JFrame {
         // Botón de detener
         stopButton = new JButton("Detener");
         stopButton.setBounds(360, 300, 100, 25);
-        stopButton.setEnabled(false); // Deshabilitado al inicio
+        stopButton.setEnabled(false);
         add(stopButton);
+        
+        // Botón de pausar
+        pauseButton = new JButton("Pausar");
+        pauseButton.setBounds(140, 300, 100, 25);
+        pauseButton.setEnabled(false);
+        add(pauseButton);
 
         // Botón de limpiar
         clearButton = new JButton("Limpiar");
-        clearButton.setBounds(140, 300, 100, 25);
+        clearButton.setBounds(20, 300, 100, 25);
         add(clearButton);
 
         // Área de texto para mostrar el conteo
         displayArea = new JTextArea();
-        displayArea.setEditable(false);  // El área de texto no es editable
+        displayArea.setEditable(false);
 
-        // Crear el JScrollPane para agregar el área de texto con scroll
+        // Crear el JScrollPanel para agregar el área de texto con scroll
         scrollPane = new JScrollPane(displayArea);
-        scrollPane.setBounds(20, 100, 440, 200);  // Ajustar posición y tamaño
-        add(scrollPane);  // Agregar el scrollPane en lugar del JTextArea directamente
+        scrollPane.setBounds(20, 100, 440, 200);
+        add(scrollPane);
 
         // Acción del botón iniciar
         startButton.addActionListener(new ActionListener() {
@@ -88,6 +101,14 @@ public class PrintWindow extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 stopCounting();
+            }
+        });
+
+        // Acción del botón pausar
+        pauseButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pauseCounting();
             }
         });
 
@@ -108,8 +129,9 @@ public class PrintWindow extends JFrame {
             thread = new Thread(printsNumbers);
             thread.start();
 
-            startButton.setEnabled(false);  // Deshabilitar botón iniciar
-            stopButton.setEnabled(true);    // Habilitar botón detener
+            startButton.setEnabled(false);
+            pauseButton.setEnabled(true);
+            stopButton.setEnabled(true);
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "Por favor, ingresa un número válido.");
         }
@@ -119,19 +141,65 @@ public class PrintWindow extends JFrame {
     private void stopCounting() {
         if (printsNumbers != null) {
             printsNumbers.stopPrinting();
-            startButton.setEnabled(true);  // Habilitar botón iniciar
-            stopButton.setEnabled(false);  // Deshabilitar botón detener
+            startButton.setEnabled(true);
+            pauseButton.setEnabled(false);
+            stopButton.setEnabled(false);
+        }
+    }
+
+    // Método para pausar el conteo
+    private void pauseCounting() {
+        if (printsNumbers != null) {
+            printsNumbers.togglePause();
         }
     }
 
     // Método para limpiar el área de texto
     private void clearDisplay() {
         displayArea.setText("");
-        countLimitField.setText("Ingrese cantidad");  // Restablecer el placeholder
+        countLimitField.setText("Ingrese cantidad");
+    }
+}
+
+// Clase que maneja la impresión de números
+class PrintsNumbers implements Runnable {
+    private int limit;
+    private JTextArea displayArea;
+    private volatile boolean isPaused = false;
+    private volatile boolean isStopped = false;
+
+    public PrintsNumbers(int limit, JTextArea displayArea) {
+        this.limit = limit;
+        this.displayArea = displayArea;
     }
 
-    public static void main(String[] args) {
-        PrintWindow window = new PrintWindow();
-        window.setVisible(true);
+    @Override
+    public void run() {
+        for (int i = 1; i <= limit; i++) {
+            if (isStopped) break;
+            while (isPaused) {
+                try {
+                    Thread.sleep(100);  // Esperar mientras está en pausa
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            displayArea.append(i + "\n");
+            try {
+                Thread.sleep(500);  // Simulación de tiempo entre números
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    // Método para detener el conteo
+    public void stopPrinting() {
+        isStopped = true;
+    }
+
+    // Método para pausar o reanudar el conteo
+    public void togglePause() {
+        isPaused = !isPaused;
     }
 }

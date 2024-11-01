@@ -5,7 +5,9 @@ import java.util.Timer;
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-
+//Greizel sension 8-940-530
+//nota  100 
+//21/10/24
 public class Lab15_TimerAndTimerTask {
 
     public static void main(String[] args) {
